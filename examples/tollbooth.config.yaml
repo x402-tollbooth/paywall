@@ -1,0 +1,34 @@
+gateway:
+  port: ${TOLLBOOTH_PORT}
+  discovery: true
+
+wallets:
+  base-sepolia: "${PAY_TO}"
+
+accepts:
+  - asset: USDC
+    network: base-sepolia
+
+defaults:
+  price: "$0.001"
+  timeout: 300
+
+upstreams:
+  demo:
+    url: "http://localhost:${UPSTREAM_PORT}"
+
+routes:
+  "GET /data":
+    upstream: demo
+    path: "/data"
+    price: "$0.001"
+
+  "GET /article":
+    upstream: demo
+    path: "/article"
+    price: "$0.005"
+
+  "GET /video":
+    upstream: demo
+    path: "/video"
+    price: "$0.025"

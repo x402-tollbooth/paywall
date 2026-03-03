@@ -1,10 +1,9 @@
 import type { x402HTTPClient } from "@x402/core/client";
 import type { Network } from "@x402/core/types";
-import { wrapFetchWithPayment } from "@x402/fetch";
 import { createContext, type ReactNode, useMemo } from "react";
 import { usePublicClient, useWalletClient } from "wagmi";
 import { walletClientToSigner } from "./lib/signer";
-import { createX402Client } from "./lib/x402";
+import { createPaymentFetch, createX402Client } from "./lib/x402";
 
 export interface TollboothContextValue {
 	/** Payment-enabled fetch. null when wallet not connected. */
@@ -50,8 +49,8 @@ export function TollboothProvider({
 		}
 
 		const signer = walletClientToSigner(walletClient, publicClient);
-		const httpClient = createX402Client({ signer, networks });
-		const paymentFetch = wrapFetchWithPayment(fetch, httpClient);
+		const { client, httpClient } = createX402Client({ signer, networks });
+		const paymentFetch = createPaymentFetch(fetch, client, httpClient);
 
 		return {
 			paymentFetch,

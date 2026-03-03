@@ -12,7 +12,12 @@ export interface PaywallVideoProps {
 
 function decodePaymentRequired(header: string): PaymentRequired | null {
 	try {
-		return JSON.parse(atob(header));
+		const decoded = JSON.parse(atob(header));
+		// Tollbooth gateway sends a raw array — normalize to envelope
+		if (Array.isArray(decoded)) {
+			return { x402Version: 1, accepts: decoded } as PaymentRequired;
+		}
+		return decoded;
 	} catch {
 		return null;
 	}
@@ -47,7 +52,10 @@ export function PaywallVideo({
 		setState("loading");
 		setError(null);
 		try {
-			const res = await fetch(endpoint, { method: "HEAD" });
+			// Use GET (not HEAD) because x402-tollbooth only defines GET routes.
+			// A 402 body is small; if 200, we abort to avoid downloading the video.
+			const controller = new AbortController();
+			const res = await fetch(endpoint, { signal: controller.signal });
 			if (res.status === 402) {
 				const header =
 					res.headers.get("payment-required") ??
@@ -58,10 +66,13 @@ export function PaywallVideo({
 				setState("payment-required");
 				return;
 			}
-			// No payment needed — play directly
+			// No payment needed — play directly (cancel the download, use URL)
+			controller.abort();
 			setVideoUrl(endpoint);
 			setState("success");
 		} catch (err) {
+			// AbortError from our own abort is expected
+			if (err instanceof DOMException && err.name === "AbortError") return;
 			setError(err instanceof Error ? err : new Error(String(err)));
 			setState("error");
 		}
@@ -94,9 +105,12 @@ export function PaywallVideo({
 		probe();
 	}
 
-	const firstAccept = paymentInfo?.accepts?.[0];
-	const price = firstAccept
-		? formatAmount(firstAccept.amount, firstAccept.asset)
+	const firstAccept = paymentInfo?.accepts?.[0] as
+		| (Record<string, unknown> & { amount?: string; maxAmountRequired?: string; asset?: string })
+		| undefined;
+	const rawAmount = firstAccept?.amount ?? firstAccept?.maxAmountRequired;
+	const price = rawAmount
+		? formatAmount(rawAmount, firstAccept?.asset as string | undefined)
 		: null;
 	const description = paymentInfo?.resource?.description;
 

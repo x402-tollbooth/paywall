@@ -19,7 +19,12 @@ export interface PaywallGateProps {
 
 function decodePaymentRequired(header: string): PaymentRequired | null {
 	try {
-		return JSON.parse(atob(header));
+		const decoded = JSON.parse(atob(header));
+		// Tollbooth gateway sends a raw array — normalize to envelope
+		if (Array.isArray(decoded)) {
+			return { x402Version: 1, accepts: decoded } as PaymentRequired;
+		}
+		return decoded;
 	} catch {
 		return null;
 	}
@@ -138,7 +143,10 @@ export function PaywallGate({
 		}
 	}, [autoProbe, probe]);
 
-	const firstAccept = paymentInfo?.accepts?.[0];
+	const firstAccept = paymentInfo?.accepts?.[0] as
+		| (Record<string, unknown> & { amount?: string; maxAmountRequired?: string; asset?: string })
+		| undefined;
+	const rawAmount = firstAccept?.amount ?? firstAccept?.maxAmountRequired;
 
 	if (state === "success" && data != null) {
 		return (
@@ -177,9 +185,9 @@ export function PaywallGate({
 
 			{state === "payment-required" && (
 				<div data-tollbooth="gate-prompt">
-					{firstAccept && (
+					{rawAmount && (
 						<div data-tollbooth="gate-price">
-							{formatAmount(firstAccept.amount, firstAccept.asset)}
+							{formatAmount(rawAmount, firstAccept?.asset as string | undefined)}
 						</div>
 					)}
 					<div data-tollbooth="gate-description">
