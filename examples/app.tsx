@@ -15,6 +15,7 @@ import {
 	PaywallGate,
 	PaywallVideo,
 	TollboothProvider,
+	TxHistory,
 } from "../src/index";
 
 const config = getDefaultConfig({
@@ -39,8 +40,11 @@ function App() {
 					<TollboothProvider>
 						<div style={{ maxWidth: 720, margin: "0 auto", padding: 24 }}>
 							<h1>@tollbooth/paywall Demo</h1>
-							<div style={{ marginBottom: 24 }}>
+							<div style={{ display: "flex", alignItems: "flex-start", gap: 16, marginBottom: 24, flexWrap: "wrap" }}>
 								<ConnectButton />
+								<div style={{ flex: 1, minWidth: 280 }}>
+									<TxHistory />
+								</div>
 							</div>
 
 							<section style={{ marginBottom: 32 }}>

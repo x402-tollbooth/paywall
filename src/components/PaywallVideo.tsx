@@ -2,6 +2,7 @@ import type { PaymentRequired, SettleResponse } from "@x402/core/types";
 import { useCallback, useRef, useState } from "react";
 import { useTollbooth } from "../hooks/useTollbooth";
 import { explorerUrl, formatAmount } from "../lib/format";
+import { buildTxRecord, decodeSettlement } from "../lib/settlement";
 import type { TollboothState } from "../lib/types";
 
 export interface PaywallVideoProps {
@@ -23,24 +24,12 @@ function decodePaymentRequired(header: string): PaymentRequired | null {
 	}
 }
 
-function decodeSettlement(response: Response): SettleResponse | undefined {
-	const header =
-		response.headers.get("payment-response") ??
-		response.headers.get("x-payment-response");
-	if (!header) return undefined;
-	try {
-		return JSON.parse(atob(header));
-	} catch {
-		return undefined;
-	}
-}
-
 export function PaywallVideo({
 	endpoint,
 	poster,
 	className,
 }: PaywallVideoProps) {
-	const { paymentFetch, isReady } = useTollbooth();
+	const { paymentFetch, isReady, recordTx } = useTollbooth();
 	const [state, setState] = useState<TollboothState>("idle");
 	const [videoUrl, setVideoUrl] = useState<string | null>(null);
 	const [paymentInfo, setPaymentInfo] = useState<PaymentRequired | null>(null);
@@ -94,11 +83,14 @@ export function PaywallVideo({
 			const url = URL.createObjectURL(blob);
 			setVideoUrl(url);
 			setState("success");
+
+			const txRecord = buildTxRecord(settle, endpoint);
+			if (txRecord) recordTx(txRecord);
 		} catch (err) {
 			setError(err instanceof Error ? err : new Error(String(err)));
 			setState("error");
 		}
-	}, [paymentFetch, endpoint]);
+	}, [paymentFetch, endpoint, recordTx]);
 
 	// Auto-probe on first render
 	if (state === "idle") {

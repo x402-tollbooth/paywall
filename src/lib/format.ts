@@ -74,10 +74,16 @@ export function shortenAddress(address: string): string {
  */
 export function explorerUrl(txHash: string, network: string): string {
 	const explorers: Record<string, string> = {
+		// CAIP-2 identifiers
 		"eip155:8453": "https://basescan.org/tx/",
 		"eip155:84532": "https://sepolia.basescan.org/tx/",
 		"eip155:1": "https://etherscan.io/tx/",
 		"eip155:42161": "https://arbiscan.io/tx/",
+		// Human-readable names (tollbooth gateway format)
+		"base": "https://basescan.org/tx/",
+		"base-sepolia": "https://sepolia.basescan.org/tx/",
+		"ethereum": "https://etherscan.io/tx/",
+		"arbitrum": "https://arbiscan.io/tx/",
 	};
 	const base = explorers[network] ?? "https://basescan.org/tx/";
 	return `${base}${txHash}`;

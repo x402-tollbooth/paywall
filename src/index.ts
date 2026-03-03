@@ -8,6 +8,8 @@ export type { PaywallGateProps } from "./components/PaywallGate";
 export { PaywallGate } from "./components/PaywallGate";
 export type { PaywallVideoProps } from "./components/PaywallVideo";
 export { PaywallVideo } from "./components/PaywallVideo";
+export type { TxHistoryProps } from "./components/TxHistory";
+export { TxHistory } from "./components/TxHistory";
 export type {
 	TollboothContextValue,
 	TollboothProviderProps,
@@ -38,6 +40,7 @@ export {
 export type {
 	ChatMessage,
 	ClientEvmSigner,
+	TxRecord,
 	Network,
 	PaymentInfo,
 	PaymentPayload,

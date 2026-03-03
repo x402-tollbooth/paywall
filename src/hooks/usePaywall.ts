@@ -1,5 +1,5 @@
-import type { SettleResponse } from "@x402/core/types";
 import { useCallback, useRef, useState } from "react";
+import { buildTxRecord, decodeSettlement } from "../lib/settlement";
 import type { PaymentResult, TollboothState } from "../lib/types";
 import { useTollbooth } from "./useTollbooth";
 
@@ -18,20 +18,8 @@ export interface UsePaywallReturn {
 	reset: () => void;
 }
 
-function extractSettlement(response: Response): SettleResponse | undefined {
-	const header =
-		response.headers.get("payment-response") ??
-		response.headers.get("x-payment-response");
-	if (!header) return undefined;
-	try {
-		return JSON.parse(atob(header));
-	} catch {
-		return undefined;
-	}
-}
-
 export function usePaywall(): UsePaywallReturn {
-	const { paymentFetch, isReady } = useTollbooth();
+	const { paymentFetch, isReady, recordTx } = useTollbooth();
 	const [state, setState] = useState<TollboothState>("idle");
 	const [lastPayment, setLastPayment] = useState<PaymentResult | null>(null);
 	const [error, setError] = useState<Error | null>(null);
@@ -58,7 +46,7 @@ export function usePaywall(): UsePaywallReturn {
 					signal: controller.signal,
 				});
 
-				const settlement = extractSettlement(response);
+				const settlement = decodeSettlement(response);
 
 				if (!response.ok) {
 					throw new Error(`Request failed with status ${response.status}`);
@@ -67,6 +55,10 @@ export function usePaywall(): UsePaywallReturn {
 				const result: PaymentResult = { response, settlement };
 				setLastPayment(result);
 				setState("success");
+
+				const txRecord = buildTxRecord(settlement, endpoint);
+				if (txRecord) recordTx(txRecord);
+
 				return result;
 			} catch (err) {
 				const e = err instanceof Error ? err : new Error(String(err));
@@ -75,7 +67,7 @@ export function usePaywall(): UsePaywallReturn {
 				throw e;
 			}
 		},
-		[paymentFetch, isReady],
+		[paymentFetch, isReady, recordTx],
 	);
 
 	const reset = useCallback(() => {

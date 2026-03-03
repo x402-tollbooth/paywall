@@ -299,6 +299,98 @@
 	cursor: not-allowed;
 }
 
+/* ── Tx History ─────────────────────────────────────── */
+
+[data-tollbooth="tx-history"] {
+	border: 1px solid #e2e8f0;
+	border-radius: 10px;
+	overflow: hidden;
+	font-size: 13px;
+}
+
+[data-tollbooth="tx-history-header"] {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	padding: 10px 14px;
+	font-weight: 600;
+	font-size: 13px;
+	color: #4a5568;
+	border-bottom: 1px solid #e2e8f0;
+	background: #f7fafc;
+}
+
+[data-tollbooth="tx-history-count"] {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	min-width: 20px;
+	height: 20px;
+	padding: 0 6px;
+	border-radius: 10px;
+	background: #e2e8f0;
+	color: #4a5568;
+	font-size: 11px;
+	font-weight: 700;
+	margin-left: auto;
+}
+
+[data-tollbooth="tx-history-list"] {
+	display: flex;
+	flex-direction: column;
+	max-height: 240px;
+	overflow-y: auto;
+}
+
+[data-tollbooth="tx-history-item"] {
+	display: flex;
+	flex-direction: column;
+	gap: 2px;
+	padding: 10px 14px;
+	text-decoration: none;
+	color: inherit;
+	border-bottom: 1px solid #f0f0f0;
+	transition: background 0.1s;
+}
+
+[data-tollbooth="tx-history-item"]:last-child {
+	border-bottom: none;
+}
+
+[data-tollbooth="tx-history-item"]:hover {
+	background: #f7fafc;
+}
+
+[data-tollbooth="tx-history-item-main"] {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 8px;
+}
+
+[data-tollbooth="tx-history-item-path"] {
+	font-weight: 500;
+	color: #1a202c;
+	font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace;
+	font-size: 12px;
+}
+
+[data-tollbooth="tx-history-item-amount"] {
+	font-weight: 600;
+	color: #0052ff;
+	white-space: nowrap;
+}
+
+[data-tollbooth="tx-history-item-meta"] {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 8px;
+	color: #a0aec0;
+	font-size: 11px;
+	font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace;
+}
+
 /* ── Spinner ─────────────────────────────────────────── */
 
 [data-tollbooth="spinner"] {
